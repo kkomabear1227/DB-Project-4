@@ -19,13 +19,21 @@ cd auth_test
 bash auth_test.sh
 ```
 
-## Run mode
-
-```
-./EduBtM_Test
-```
-
 ## Testing
+
+![Test](test_structure.png)
+
+Autograder runs 1) correctness test and 2) performance test.
+
+Correctness Test
+
+- Outputs error
+- Workloads : 15
+
+Performance Test
+
+- Outputs runtime
+- Workloads : 15
 
 ```
 cd test
