@@ -263,9 +263,9 @@ Four EduBtM_Test(Four volId, Four handle){
 	printAnalytics(&curAnalytics);
 	printf("                             Performance \n");
 	printPerformanceTest(perfTestResults, numPerfTests, &totalTime);
-	printf("                             Final Score \n");
-	printFinalScore(coverageScore, totalScore = coverageScore + 10, totalTime);
-	fprintJSONResult(resultFp, totalScore, totalTime);
+	//printf("                             Final Score \n");
+	//printFinalScore(coverageScore, totalScore = coverageScore + 10, totalTime);
+	//fprintJSONResult(resultFp, totalScore, totalTime);
 	fclose(logFp); 
 	fclose(resultFp);
 }
