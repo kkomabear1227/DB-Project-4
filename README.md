@@ -40,6 +40,14 @@ cd test
 bash autograding.sh
 ```
 
+### Workload API
+
+- INSERT {key}: insert object with given key
+
+- DELETE {key}: delete object with given key
+
+- SCAN {start operation} {key} {end operation} {key}: fetch & fetch next
+
 ### How To Dump a Page
 
 To show detailed description about page, please use dump page API like below.
