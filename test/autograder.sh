@@ -34,12 +34,12 @@ if [ $? -ne 0 ]; then
 fi
 
 python3 checker.py ${target_output_path}
-if [ $? -eq 1 ]; then
+score=$?
+if [ $score -eq 1 ]; then
     (cd ${path}; make clean > /dev/null)
     echo -e "\n=====================FAIL======================\n"
     exit 0
 fi
-score=$?
 
 echo -e "\n====================TEST SCORE===================\n"
 
