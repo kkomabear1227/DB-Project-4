@@ -21,6 +21,14 @@ bash auth_test.sh
 
 ## Testing
 
+### Downloading solution.txt
+
+Due to restriction on git file upload size, solution.txt file is not uploaded.
+
+Before running the autograder, please download [solution.txt](https://drive.google.com/file/d/1HCTrobKdYA8w86gcSBUAVO7kT13rox9_/view?usp=sharing)
+
+### Description
+
 ![Test](test_structure.png)
 
 Autograder runs 1) correctness test and 2) performance test.
