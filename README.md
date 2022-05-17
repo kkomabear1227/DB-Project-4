@@ -95,19 +95,43 @@ EOF means end of file (the largest object in the file) while BOF means begin of 
 
 Direction of a scan is determined by second operation(a.k.a end operation)
 
+```
 If end operation is one of GT, GE or BOF, then do backward scan
 
 Else do forward scan.
+```
+
+Function calls for scanning are fetch and fetchNext.
+
+If we call scan, BtM first calls fetch and retrieves a cursor. Using the cursor BtM calls fetchNext to scan through.
+
+Then how to find appropriate key for fetch? well, fetching condition is quiet ridiculous.  
+
+It is clear to find the nearest key, meeting the starting operation. Then what about end condition? 
+
+```
+If end operation is one of LT, LE, GT, GE, EQ, we need to check against the end condition
+
+Else we don't need to check it.
+```
 
 For example, consider **SCAN GE 10 LE 100**
 
-This scan starts with 10 which is greater than 10 and **less than** 100. (Note that if end operation is not BOF/EOF, then we have to check whether selected value satisfies end condition)
+We have datas **11, 12, ..., 100**.
 
-Since the end operation is LE, we do forward scan; 10, 11, 12, ...., 100
+This scan starts with 11 which is greater than 10 and **less than** 100. Note that end operation is LE, thus we have to check whether selected value satisfies end condition.
+
+Since the end operation is LE, we do forward scan; => 11, 12, ...., 100
+
+In other words, fetch() returns 11, and fetchNext() returns 12, 13, ..., 100.
 
 Consider another example **SCAN BOF EOF**
 
-This scan starts with the smallest object and ends with the greatest value (so forward scan).
+This scan starts with the smallest object and ends with the greatest value.
+
+In this case, fetch returns 11, which is the smallest. Note that end operation is EOF, thus we don't need to check against it.
+
+Since the end operation is EOF, we do forward scan. Therefore fetchNext() returns 12, 13, ... 100.
 
 ## Report
 
