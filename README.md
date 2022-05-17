@@ -115,9 +115,11 @@ If end operation is one of LT, LE, GT, GE, EQ, we need to check against the end 
 Else we don't need to check it.
 ```
 
-For example, consider **SCAN GE 10 LE 100**
+#### Examples
 
-We have datas **11, 12, ..., 100**.
+Assume we have datas **11, 12, ..., 100**.
+
+For example, consider **SCAN GE 10 LE 100**
 
 This scan starts with 11 which is greater than 10 and **less than** 100. Note that end operation is LE, thus we have to check whether selected value satisfies end condition.
 
