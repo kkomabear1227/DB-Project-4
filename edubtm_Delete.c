@@ -130,7 +130,6 @@ Four edubtm_Delete(
     
     
     /* Delete following 2 lines before implement this function */
-    printf("Implementation of delete operation is optional (not compulsory),\n");
     printf("and delete operation has not been implemented yet.\n");
 
 
@@ -203,7 +202,6 @@ Four edubtm_DeleteLeaf(
 
 
     /* Delete following 2 lines before implement this function */
-    printf("Implementation of delete operation is optional (not compulsory),\n");
     printf("and delete operation has not been implemented yet.\n");
 
 	      
