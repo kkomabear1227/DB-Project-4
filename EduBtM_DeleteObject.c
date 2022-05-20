@@ -105,7 +105,6 @@ Four EduBtM_DeleteObject(
 
 
 	/* Delete following 3 lines before implement this function */
-	printf("Implementation of delete operation is optional (not compulsory),\n");
 	printf("and delete operation has not been implemented yet.\n");
 	return(eNOTSUPPORTED_EDUBTM);
 
