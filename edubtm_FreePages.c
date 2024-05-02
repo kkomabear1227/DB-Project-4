@@ -85,15 +85,26 @@ Four edubtm_FreePages(
     // 관련 함수: BfM_GetNewTrain, BfM_FreeTrain, BfM_SetDirty, Util_getElementFromPool
 
     // 1. 재귀적으로 edubtm_FreePages()를 호출해, 모든 child page가 deallocation될 수 있게 함
-
     BfM_GetNewTrain(curPid, (char**)&apage, PAGE_BUF);
 
-    if (apage->any.hdr.type & INTERNAL) {
-
+    if () {
+        
     }
 
     // 2. page를 deallocation 시킨다.
-    
+    apage->any.hdr.type = FREEPAGE;
+    // Deallocation element를 받아옴.
+    Util_getElementFromPool(dlPool, &dlElem);
+    // Deallocation될 page의 정보를 dlElem에 저장
+    dlElem->type = DL_PAGE;
+    dlElem->elem.pid = *curPid;
+    // Dealloc list의 제일 처음에 element를 삽입
+    dlElem->next = dlHead->next;
+    dlHead->next = dlElem;
+
+    BfM_SetDirty(curPid, PAGE_BUF);
+    BfM_FreeTrain(curPid, PAGE_BUF);
+
     return(eNOERROR);
     
 }   /* edubtm_FreePages() */

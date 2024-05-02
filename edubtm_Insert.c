@@ -117,6 +117,10 @@ Four edubtm_Insert(
             ERR(eNOTSUPPORTED_EDUBTM);
     }
 
+    // 1. parameter로 주어진 page를 root page로 하는 B+ tree index에 대해
+    // <object key, object ID>를 삽입하고, root split이 발생한 경우, 새 page를 가리키는 internal index entry를 반환
+
+    
     
     return(eNOERROR);
     
