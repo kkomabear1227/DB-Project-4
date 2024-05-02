@@ -99,7 +99,26 @@ Four edubtm_InitLeaf(
     Four e;			/* error number */
     BtreeLeaf *page;		/* a page pointer */
 
+    // page를 B+ tree 의 leaf page로 초기화한다.
+    BfM_GetNewTrain(leaf, (char**)&page, PAGE_BUF);
 
+    page->hdr.pid = *leaf;
+    
+    //flags: Set a bit indicating that the page is a B+ tree index page
+    page->hdr.flags = //;
+
+    //type: Set a bit indicating that the page is a leaf page
+    if (root) page->hdr.type = //;
+    else page->hdr.type = //;
+
+    page->hdr.nSlots = 0;
+    page->hdr.free = 0;
+    page->hdr.prevPage = NIL;
+    page->hdr.nextPage = NIL;
+    page->hdr.unused = 0;
+
+    BfM_SetDirty(leaf, PAGE_BUF);
+    BfM_FreeTrain(leaf, PAGE_BUF);
     
     return(eNOERROR);
     
