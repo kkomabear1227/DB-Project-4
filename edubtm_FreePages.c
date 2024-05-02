@@ -81,7 +81,18 @@ Four edubtm_FreePages(
     btm_LeafEntry       *lEntry;        /* a leaf entry */
     DeallocListElem     *dlElem;        /* an element of dealloc list */
 
+    // Deallocate a B+ tree index page
+    // 관련 함수: BfM_GetNewTrain, BfM_FreeTrain, BfM_SetDirty, Util_getElementFromPool
 
+    // 1. 재귀적으로 edubtm_FreePages()를 호출해, 모든 child page가 deallocation될 수 있게 함
+
+    BfM_GetNewTrain(curPid, (char**)&apage, PAGE_BUF);
+
+    if (apage->any.hdr.type & INTERNAL) {
+
+    }
+
+    // 2. page를 deallocation 시킨다.
     
     return(eNOERROR);
     

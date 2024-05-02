@@ -64,7 +64,10 @@ Four EduBtM_DropIndex(
 
 
     /*@ Free all pages concerned with the root. */
-
+    // Delete a B+ tree index from an index file
+    // Deallocate a root page and every child page of the B+ tree index
+    // 연관 함수: edubtm_FreePages
+    edubtm_FreePages(pFid, rootPid, dlPool, dlHead);
 	
     return(eNOERROR);
     

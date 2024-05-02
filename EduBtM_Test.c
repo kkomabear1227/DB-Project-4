@@ -231,7 +231,7 @@ Four EduBtM_Test(Four volId, Four handle){
 				MAKE_PHYSICALFILEID(pFid, catalogOverlay.fid.volNo, catalogOverlay.firstPage);
 
 				/* The successful default solution code is called if "Edu" is omitted from the function name in the following line */
-				e = BtM_DropIndex(&pFid, &rootPid, &dlPool, &dlHead);
+				e = EduBtM_DropIndex(&pFid, &rootPid, &dlPool, &dlHead);
 				if (e < eNOERROR) ERR(e);	
 
 				fprintfWrapper(logFp,"\n");

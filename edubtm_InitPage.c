@@ -105,11 +105,11 @@ Four edubtm_InitLeaf(
     page->hdr.pid = *leaf;
     
     //flags: Set a bit indicating that the page is a B+ tree index page
-    page->hdr.flags = //;
+    page->hdr.flags = BTREE_PAGE_TYPE;
 
     //type: Set a bit indicating that the page is a leaf page
-    if (root) page->hdr.type = //;
-    else page->hdr.type = //;
+    if (root) page->hdr.type = LEAF | ROOT;
+    else page->hdr.type = LEAF;
 
     page->hdr.nSlots = 0;
     page->hdr.free = 0;
