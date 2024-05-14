@@ -62,7 +62,6 @@ Four EduBtM_DropIndex(
 {
     Four e;			/* for the error number */
 
-
     /*@ Free all pages concerned with the root. */
     // Delete a B+ tree index from an index file
     // Deallocate a root page and every child page of the B+ tree index

@@ -89,6 +89,8 @@ Four EduBtM_CreateIndex(
     // 3. page ID를 반환
     // 할당된 object 정리
     e = BfM_FreeTrain((TrainID*)catObjForFile, PAGE_BUF);
+    if (e < 0) ERR(e);
+    
     return(eNOERROR);
     
 } /* EduBtM_CreateIndex() */

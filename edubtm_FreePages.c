@@ -87,8 +87,18 @@ Four edubtm_FreePages(
     // 1. 재귀적으로 edubtm_FreePages()를 호출해, 모든 child page가 deallocation될 수 있게 함
     BfM_GetNewTrain(curPid, (char**)&apage, PAGE_BUF);
 
-    if () {
-        
+    if (apage->any.hdr.type & INTERNAL) {
+        BtreeInternal* cur = &(apage->bi);
+        MAKE_PAGEID(tPid, curPid->volNo, cur->hdr.p0);
+        edubtm_FreePages(pFid, &tPid, dlPool, dlHead);
+
+        for (i = 0; i<cur->hdr.nSlots; i++) {
+            iEntryOffset = apage->bi.slot[-i];
+            iEntry = (btm_InternalEntry*)&(cur->data[iEntryOffset]);
+
+            MAKE_PAGEID(tPid, curPid->volNo, iEntry->spid);
+            edubtm_FreePages(pFid, &tPid, dlPool, dlHead);
+        }
     }
 
     // 2. page를 deallocation 시킨다.
