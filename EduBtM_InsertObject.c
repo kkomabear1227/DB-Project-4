@@ -101,7 +101,7 @@ Four EduBtM_InsertObject(
     // 1. edubtm_Insert()를 호출해, <object's key, object ID>를 삽입
     edubtm_Insert(catObjForFile, root, kdesc, kval, oid, &lf, &lh, &item, dlPool, dlHead);
     // 2. 만약 root splitting이 발생한 경우 (lh), edubtm_root_insert()를 호출해 처리
-    if (lh) edubtm_root_insert(catObjForFile, root, &item);
+    if (lh) edubtm_root_insert(catObjForFile, root, &item); 
     
     return(eNOERROR);
     

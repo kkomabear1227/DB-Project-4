@@ -66,7 +66,28 @@ Four edubtm_InitInternal(
     Four e;			/* error number */
     BtreeInternal *page;	/* a page pointer */
 
+    // page를 B+ tree의 internal page로 초기화한다.
+    // 1. page header를 internal page로 초기화한다.
+    
+    BfM_GetNewTrain(internal, (char**)&page, PAGE_BUF);
 
+    // pid: 파라미터로 주어진 값을 이용
+    page->hdr.pid = *internal;
+    // flags: B+ tree index page임을 나타내는 bit을 세팅
+    page->hdr.flags = BTREE_PAGE_TYPE;
+    // type: internal page를 나타내는 bit을 세팅
+    //       root page라면 root page임을 나타내는 bit도 세팅
+    if (root) page->hdr.type = INTERNAL | ROOT;
+    else page->hdr.type = INTERNAL;
+
+    page->hdr.p0 = NIL;
+    page->hdr.nSlots = 0;
+    page->hdr.free = 0;
+    page->hdr.unused = 0;
+
+    // 2. 마무리
+    BfM_SetDirty(internal, PAGE_BUF);
+    BfM_FreeTrain(internal, PAGE_BUF);
     
     return(eNOERROR);
     
