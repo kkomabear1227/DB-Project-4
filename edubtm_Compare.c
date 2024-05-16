@@ -92,7 +92,36 @@ Four edubtm_KeyCompare(
             ERR(eNOTSUPPORTED_EDUBTM);
     }
 
-        
+    // 파라미터로 주어진 key1, key2의 대소를 비교하고 결과를 반환한다.
+    // 같을 경우 EQUAL, key1이 더 클 경우 GREAT, key1이 작을 경우 LESS
+
+    // 1. INT
+    if (kdesc->kpart[0].type == SM_INT) {
+        i1 = *(int*)key1->val;
+        i2 = *(int*)key2->val;
+
+        if (i1 > i2) return  GREAT;
+        else if (i1 == i2) return EQUAL;
+        else return LESS;
+    }
+
+    // 2. VARSTRING 
+    if (kdesc->kpart[0].type == SM_VARSTRING) {
+        len1 = key1->len;
+        len2 = key2->len;
+
+        for (i = 0; i < MIN(len1, len2); i++) {
+            if (key1->val[i] > key2->val[i]) return GREAT;
+            else if (key1->val[i] == key2->val[i]) continue;
+            else return LESS;
+        }
+
+        //길이를 끝까지 비교했는데도 안끝남, 자투리가 있는지 확인
+        if (len1 > len2) return GREAT;
+        else if (len1 == len2) return EQUAL;
+        else return LESS;
+    }
+    
     return(EQUAL);
     
 }   /* edubtm_KeyCompare() */
