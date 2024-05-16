@@ -90,6 +90,33 @@ Four edubtm_FirstObject(
             ERR(eNOTSUPPORTED_EDUBTM);
     }
     
+    // B+ tree index에서 가장 작은 key 값을 가진 leaf index entry를 가리키는 cursor를 반환한다.
+    // root부터 시작
+    BfM_GetTrain(root, &apage, PAGE_BUF);
+
+    // case 1. INTERNAL PAGE -> 재귀적으로 왼쪽으로 타고들어간다.
+    if (apage->any.hdr.type & INTERNAL) {
+        MAKE_PAGEID(child, root->volNo, apage->bi.hdr.p0);
+        edubtm_FirstObject(&child, kdesc, stopKval, stopCompOp, cursor);
+    }
+    // case 2. LEAF PAGE -> 안쪽에서 제일 작은 key값을 찾는다.
+    else if (apage->any.hdr.type & LEAF) {
+        lEntry = &(apage->bl.data[apage->bl.slot[0]]);
+        memcpy(&cursor->key, &lEntry->klen, sizeof(KeyValue));
+
+        // 만약 검색 종료 key 값 stopKval이 첫 object의 key 값보다 작거나, key 값이 같으나 종료 연산이 SM_LT일 때 CURSOR_EOS를 반환한다.
+        cmp = edubtm_KeyCompare(kdesc, stopKval, &cursor->key);
+        if (cmp == LESS || (cmp == EQUAL && stopCompOp == SM_LT)) cursor->flag = CURSOR_EOS;
+        else {
+            cursor->flag = CURSOR_ON;
+            cursor->leaf = *root;
+            cursor->slotNo = 0;
+            cursor->oid = ((ObjectID*)&lEntry->kval[ALIGNED_LENGTH(cursor->key.len)])[0];
+        }
+    }
+
+    // 마무리
+    BfM_FreeTrain(root, PAGE_BUF);
 
     return(eNOERROR);
     
