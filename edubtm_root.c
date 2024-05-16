@@ -96,7 +96,7 @@ Four edubtm_root_insert(
 
     // 3. 새로운 root page의 자식으로 split된 page와 할당 받은 page를 넣어준다.
     // 3-1) Split으로 생성된 page를 가리키는 internal index entry를 새 root page에 삽입
-    entry = rootPage->bi.data + root->bi.hdr.free;
+    entry = rootPage->bi.data + rootPage->bi.hdr.free;
     entry->spid = item->spid;
     entry->klen = item->klen;
     memcpy(entry->kval, item->kval, entry->klen);

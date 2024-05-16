@@ -115,7 +115,7 @@ Boolean edubtm_BinarySearchInternal(
     // 2) 같은 key를 가진 index entry가 없다면 kval 이하의 key 값을 갖는 index entry 중
     // 가장 큰 key 값을 가진 index entry와 FALSE를 반환
     *idx = hi;
-    return FALSE:
+    return FALSE;
 } /* edubtm_BinarySearchInternal() */
 
 
@@ -189,6 +189,6 @@ Boolean edubtm_BinarySearchLeaf(
     // 2) 같은 key를 가진 index entry가 없다면 kval 이하의 key 값을 갖는 index entry 중
     // 가장 큰 key 값을 가진 index entry와 FALSE를 반환
     *idx = hi;
-    return FALSE:
+    return FALSE;
 
 } /* edubtm_BinarySearchLeaf() */
