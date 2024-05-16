@@ -73,9 +73,9 @@ Boolean edubtm_BinarySearchInternal(
     KeyValue      	*kval,		/* IN key value */
     Two          	*idx)		/* OUT index to be returned */
 {
-    Two  		low;		/* low index */
+    Two  		lo;		/* low index */
     Two  		mid;		/* mid index */
-    Two  		high;		/* high index */
+    Two  		hi;		/* high index */
     Four 		cmp;		/* result of comparison */
     btm_InternalEntry 	*entry;	/* an internal entry */
 
@@ -88,7 +88,34 @@ Boolean edubtm_BinarySearchInternal(
             ERR(eNOTSUPPORTED_EDUBTM);
     }
 
+    // Internal page들 중에서 파라미터로 주어진 kval 이하의 key 값을 갖는 index entry를 검색해 slot 번호를 반환한다.
+    // 3) kval이 주어진 page의 index entry 모두보다 작다면..
+    if (ipage->hdr.nSlots < 0) {
+        *idx = -1;
+        return FALSE;
+    }
+
+    lo = 0, hi = ipage->hdr.nSlots - 1;
+    while(lo <= hi) {
+        mid = (lo + hi) >> 1;
+        entry = ipage->data + ipage->slot[-mid];
+        
+        // key 값을 비교
+        cmp = edubtm_KeyCompare(kdesc, kval, &entry->klen);
+
+        if (cmp == LESS) hi = mid - 1;
+        else if (cmp == GREAT) lo = mid + 1;
+        else if (cmp == EQUAL) {
+            // 1) 만약 같은 key 값을 가진 index entry가 있다면 slot 번호와 TRUE를 반환
+            *idx = mid;
+            return TRUE;
+        }
+    }
     
+    // 2) 같은 key를 가진 index entry가 없다면 kval 이하의 key 값을 갖는 index entry 중
+    // 가장 큰 key 값을 가진 index entry와 FALSE를 반환
+    *idx = hi;
+    return FALSE:
 } /* edubtm_BinarySearchInternal() */
 
 
@@ -120,9 +147,9 @@ Boolean edubtm_BinarySearchLeaf(
     KeyValue  		*kval,		/* IN key value */
     Two       		*idx)		/* OUT index to be returned */
 {
-    Two  		low;		/* low index */
+    Two  		lo;		/* low index */
     Two  		mid;		/* mid index */
-    Two  		high;		/* high index */
+    Two  		hi;		/* high index */
     Four 		cmp;		/* result of comparison */
     btm_LeafEntry 	*entry;		/* a leaf entry */
 
@@ -135,5 +162,33 @@ Boolean edubtm_BinarySearchLeaf(
             ERR(eNOTSUPPORTED_EDUBTM);
     }
 
+    // Leaf page 중 파라미터로 주어진 kval 이하의 key값을 갖는 index entry의 slot 번호를 반환
+    // 3) kval이 주어진 page의 index entry 모두보다 작다면..
+    if (lpage->hdr.nSlots < 0) {
+        *idx = -1;
+        return FALSE;
+    }
+
+    lo = 0, hi = lpage->hdr.nSlots - 1;
+    while(lo <= hi) {
+        mid = (lo + hi) >> 1;
+        entry = lpage->data + lpage->slot[-mid];
+        
+        // key 값을 비교
+        cmp = edubtm_KeyCompare(kdesc, kval, &entry->klen);
+
+        if (cmp == LESS) hi = mid - 1;
+        else if (cmp == GREAT) lo = mid + 1;
+        else if (cmp == EQUAL) {
+            // 1) 만약 같은 key 값을 가진 index entry가 있다면 slot 번호와 TRUE를 반환
+            *idx = mid;
+            return TRUE;
+        }
+    }
     
+    // 2) 같은 key를 가진 index entry가 없다면 kval 이하의 key 값을 갖는 index entry 중
+    // 가장 큰 key 값을 가진 index entry와 FALSE를 반환
+    *idx = hi;
+    return FALSE:
+
 } /* edubtm_BinarySearchLeaf() */
