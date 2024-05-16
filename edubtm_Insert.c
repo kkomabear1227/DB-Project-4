@@ -120,7 +120,39 @@ Four edubtm_Insert(
     // 1. parameter로 주어진 page를 root page로 하는 B+ tree index에 대해
     // <object key, object ID>를 삽입하고, root split이 발생한 경우, 새 page를 가리키는 internal index entry를 반환
 
-    
+    *h = FALSE;
+    *f = FALSE;
+
+    BfM_GetTrain(root, &apage, PAGE_BUF);
+
+    // Case 1. Root page가 INTERNAL page이다.
+    if (apage->any.hdr.type & INTERNAL) {
+        // 1) 새 <object key, object ID>를 삽입할 leaf page를 찾기 위해 binary search를 수행
+        edubtm_BinarySearchInternal(apage, kdesc, kval, &idx);
+
+        // 2) 결정된 자식 page를 root로 하는 B+ subtree에 새로운 <object key, object ID>를 삽입하기 위해
+        //    edubtm_Insert()를 재귀적으로 호출
+        //    만약 
+        iEntryOffset = apage->bi.slot[-idx];
+        iEntry = (btm_InternalEntry*) &apage->bi.data[iEntryOffset];
+
+        if (idx >= 0) MAKE_PAGEID(newPid, root->volNo, iEntry->spid);
+        else MAKE_PAGEID(newPid, root->volNo, apage->bi.hdr.p0);
+
+        lh = FALSE;
+        lf = FALSE;
+
+        edubtm_Insert(catObjForFile, &newPid, kdesc, kval, oid, &lf, &lh, &litem, dlPool, dlHead);
+        
+    }
+    // Case 2. Root page가 LEAF page이다.
+    else if (apage->any.hdr.type & LEAF) {
+        //edubtm_InsertLeaf()를 호출한다. split이 일어나면 new page에 대한 internal index entry를 return
+        edubtm_InsertLeaf(catObjForFile, root, &(apage->bl), kdesc, kval, oid, f, h, item);
+    }
+
+    BfM_SetDirty(root, PAGE_BUF);
+    BfM_FreeTrain(root, PAGE_BUF);
     
     return(eNOERROR);
     

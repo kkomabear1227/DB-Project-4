@@ -105,10 +105,12 @@ Four edubtm_LastObject(
     }
     // case 2. LEAF PAGE -> 안쪽에서 제일 작은 key값을 찾는다.
     else if (apage->any.hdr.type & LEAF) {
+        // 1) 만약 nextPage가 있다면, doubly linked list를 따라간다.
         if (apage->bl.hdr.nextPage != NIL) {
             MAKE_PAGEID(curPid, root->volNo, apage->bl.hdr.nextPage);
             edubtm_LastObject(&curPid, kdesc, stopKval, stopCompOp, cursor);
         }
+        // 2) 마지막 page를 찾았다면, 제일 key 값이 큰 index entry를 찾는다.
         else {
             lEntry = apage->bl.data + apage->bl.slot[-(apage->bl.hdr.nSlots - 1)];
             memcpy(&cursor->key, &lEntry->klen, sizeof(KeyValue));
