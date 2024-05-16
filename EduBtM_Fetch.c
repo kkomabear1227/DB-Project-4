@@ -92,8 +92,16 @@ Four EduBtM_Fetch(
         if(kdesc->kpart[i].type!=SM_INT && kdesc->kpart[i].type!=SM_VARSTRING)
             ERR(eNOTSUPPORTED_EDUBTM);
     }
-    
 
+    // B+ tree index에서 검색 조건을 만족하는 object를 찾아 cursor를 반환한다.
+
+    // 1) startCompOp가 SM_BOF일 경우: 가장 작은 object를 찾아 반환한다.
+    if (startCompOp == SM_BOF) edubtm_FirstObject(root, kdesc, stopKval, stopCompOp, cursor);
+    // 2) startCompOp가 SM_EOF일 경우: 가장 큰 object를 찾아 반환한다.
+    else if (startCompOp == SMP_EOF) edubtm_LastObject(root, kdesc, stopKval, stopCompOp, cursor);
+    // 3) 이외의 경우, edubtm_fetch()를 호출해 검색 조건을 만족하는 첫 <object key, object ID>를 찾아 leaf index entry를 반환한다.
+    else edubtm_Fetch(root, kdesc, startKval, startCompOp, stopKval, stopCompOp, cursor);
+    
     return(eNOERROR);
 
 } /* EduBtM_Fetch() */

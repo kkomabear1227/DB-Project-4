@@ -107,6 +107,8 @@ Four EduBtM_FetchNext(
             ERR(eNOTSUPPORTED_EDUBTM);
     }
 
+    // B+ tree index에서 검색 조건을 만족하는 현재 object의 다음 object를 반환한다.
+    edubtm_FetchNext(kdesc, kval, compOp, current, next);
     
     return(eNOERROR);
     
