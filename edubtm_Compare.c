@@ -72,7 +72,7 @@ Four edubtm_KeyCompare(
     register unsigned char      *left;          /* left key value */
     register unsigned char      *right;         /* right key value */
     Two                         i;              /* index for # of key parts */
-    Two                         j;              /* temporary variable */
+    Two                         j1, j2;              /* temporary variable */
     Two                         kpartSize;      /* size of the current kpart */
     Two                         len1, len2;	/* string length */
     Two_Invariable              s1, s2;         /* 2-byte short values */
@@ -94,34 +94,36 @@ Four edubtm_KeyCompare(
 
     // 파라미터로 주어진 key1, key2의 대소를 비교하고 결과를 반환한다.
     // 같을 경우 EQUAL, key1이 더 클 경우 GREAT, key1이 작을 경우 LESS
+    left = key1->val;
+    right = key2->val;
 
-    // 1. INT
-    if (kdesc->kpart[0].type == SM_INT) {
-        i1 = *(int*)key1->val;
-        i2 = *(int*)key2->val;
+    j1 = 0, j2 = 0;
+    for (int i = 0; i < kdesc->nparts; i++) {
+        // case 1. INT
+        if (kdesc->kpart[i].type == SM_INT) {
+            kpartSize = kdesc->kpart[i].length;
+            memcpy(&i1, &left[j1], kpartSize);
+            memcpy(&i2, &right[j2], kpartSize);
 
-        if (i1 > i2) return  GREAT;
-        else if (i1 == i2) return EQUAL;
-        else return LESS;
-    }
+            if (i1 > i2) return GREAT;
+            else if (i1 < i2) return LESS;
 
-    // 2. VARSTRING 
-    if (kdesc->kpart[0].type == SM_VARSTRING) {
-        len1 = key1->len;
-        len2 = key2->len;
-
-        for (i = 0; i < MIN(len1, len2); i++) {
-            if (key1->val[i] > key2->val[i]) return GREAT;
-            else if (key1->val[i] == key2->val[i]) continue;
-            else return LESS;
+            j1 += kpartSize, j2 += kpartSize;
         }
+        // case 2. VARSTRING
+        else if (kdesc->kpart[i].type == SM_VARSTRING) {
+            memcpy(&len1, &left[j1], sizeof(Two));
+            memcpy(&len2, &right[j2], sizeof(Two));
 
-        //길이를 끝까지 비교했는데도 안끝남, 자투리가 있는지 확인
-        if (len1 > len2) return GREAT;
-        else if (len1 == len2) return EQUAL;
-        else return LESS;
+            if (strcmp(&left[j1+sizeof(Two)], &right[j1+sizeof(Two)]) > 0) return GREAT;
+			else if (strcmp(&left[j1+sizeof(Two)], &right[j1+sizeof(Two)]) < 0) return LESS;
+			
+			j1 += len1 + sizeof(Two);
+			j2 += len2 + sizeof(Two);
+        }
+        else break;
     }
     
-    return(EQUAL);
+    return EQUAL;
     
 }   /* edubtm_KeyCompare() */

@@ -161,7 +161,69 @@ Four edubtm_FetchNext(
             ERR(eNOTSUPPORTED_EDUBTM);
     }
 
-    
+    // B+ tree index에서 검색 조건을 만족하는 현재 object의 다음 object를 반환한다.
+    // 1. 위치해있는 page와 slotNo를 알아낸다
+    leaf = current->leaf;
+	overflow = leaf;
+	next->flag = CURSOR_ON;
+    Two idx = current->slotNo;
+
+    if(compOp == SM_EQ) next->flag = CURSOR_EOS;
+    else if(compOp == SM_GT || compOp == SM_GE || compOp == SM_BOF) idx--; 
+    else if(compOp == SM_LT || compOp == SM_LE || compOp == SM_EOF) idx++;
+
+    BfM_GetTrain(&leaf, &apage, PAGE_BUF);
+
+    if(next->flag != CURSOR_EOS) {
+        if(idx < 0) {
+            if(apage->hdr.prevPage != NIL) {
+                BfM_FreeTrain(&leaf, PAGE_BUF);
+
+                MAKE_PAGEID(overflow, leaf.volNo, apage->hdr.prevPage);
+                BfM_GetTrain(&overflow, &apage, PAGE_BUF);
+
+                idx = apage->hdr.nSlots - 1;
+            }
+            else {
+                next->flag = CURSOR_EOS;
+            }
+        }
+        else if(idx >= apage->hdr.nSlots) {
+            if(apage->hdr.nextPage != NIL) {
+                BfM_FreeTrain(&leaf, PAGE_BUF);
+
+                MAKE_PAGEID(overflow, leaf.volNo, apage->hdr.nextPage);
+                BfM_GetTrain(&overflow, &apage, PAGE_BUF);
+
+                idx = 0;
+            }
+            else {
+                next->flag = CURSOR_EOS;
+            }
+        }
+        else {
+            BfM_FreeTrain(&leaf, PAGE_BUF);
+            BfM_GetTrain(&overflow, &apage, PAGE_BUF);
+        }
+
+        next->leaf = overflow;
+		next->slotNo = idx;
+
+        entry = &apage->data[apage->slot[-idx]];
+		alignedKlen = ALIGNED_LENGTH(entry->klen);
+
+		memcpy(&next->oid, &(entry->kval[alignedKlen]), OBJECTID_SIZE);
+		memcpy(&next->key, &entry->klen, sizeof(KeyValue));
+
+    // 3. 적합성 검사
+    cmp = edubtm_KeyCompare(kdesc, &next->key, kval);
+    if (compOp == SM_LE && (cmp != LESS && cmp != EQUAL)) next->flag = CURSOR_EOS;
+    if (compOp == SM_LT && cmp != LESS) next->flag = CURSOR_EOS;
+    if (compOp == SM_GE && (cmp != GREAT && cmp != EQUAL)) next->flag = CURSOR_EOS;
+    if (compOp == SM_GE && cmp != GREAT) next->flag = CURSOR_EOS;
+
+    // 4. 마무리
+    BfM_FreeTrain(&overflow, PAGE_BUF);
+
     return(eNOERROR);
-    
 } /* edubtm_FetchNext() */

@@ -180,7 +180,7 @@ Four EduBtM_Test(Four volId, Four handle){
 				clock_gettime(CLOCK_MONOTONIC_RAW, &startTime);
 		
 				/* The successful default solution code is called if "Edu" is omitted from the function name in the following line */
-				e = EduBtM_CreateIndex(&catalogEntry, &rootPid);
+				e = BtM_CreateIndex(&catalogEntry, &rootPid);
 				if(e == eNOTSUPPORTED_EDUBTM) {
 					tmpAnalytics.numNotImplemented++;
 				}
@@ -231,7 +231,7 @@ Four EduBtM_Test(Four volId, Four handle){
 				MAKE_PHYSICALFILEID(pFid, catalogOverlay.fid.volNo, catalogOverlay.firstPage);
 
 				/* The successful default solution code is called if "Edu" is omitted from the function name in the following line */
-				e = EduBtM_DropIndex(&pFid, &rootPid, &dlPool, &dlHead);
+				e = BtM_DropIndex(&pFid, &rootPid, &dlPool, &dlHead);
 				if (e < eNOERROR) ERR(e);	
 
 				fprintfWrapper(logFp,"\n");
@@ -846,7 +846,7 @@ void execute(
 			
 			do{
 				/* The successful default solution code is called if "Edu" is omitted from the function name in the following line */
-				e = BtM_FetchNext(rootPid, kdesc, &stopKval, *endCompOp, &cursor, &next);
+				e = EduBtM_FetchNext(rootPid, kdesc, &stopKval, *endCompOp, &cursor, &next);
 				if (testType == COVERAGE) hashResult = fetchNext(keyType, *endCompOp, hashResult, *endIntKey, endStringKey);
 
 				if(e == eNOTSUPPORTED_EDUBTM) {
