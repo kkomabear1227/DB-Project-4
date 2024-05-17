@@ -98,23 +98,31 @@ Boolean edubtm_BinarySearchInternal(
     lo = 0, hi = ipage->hdr.nSlots - 1;
     while(lo <= hi) {
         mid = (lo + hi) >> 1;
-        entry = ipage->data + ipage->slot[-mid];
+        entry = &(ipage->data[ipage->slot[-mid]]);
         
         // key 값을 비교
         cmp = edubtm_KeyCompare(kdesc, kval, &entry->klen);
 
         if (cmp == LESS) hi = mid - 1;
         else if (cmp == GREAT) lo = mid + 1;
-        else if (cmp == EQUAL) {
-            // 1) 만약 같은 key 값을 가진 index entry가 있다면 slot 번호와 TRUE를 반환
-            *idx = mid;
-            return TRUE;
+        else if (cmp == EQUAL) break;
+    }
+
+    if (cmp == EQUAL) {
+        *idx = mid;
+        return TRUE;
+    }
+    else {
+        while(cmp != GREAT && mid >= 0) {
+            mid--;
+            entry = &(ipage->data[ipage->slot[-mid]]);
+            cmp = edubtm_KeyCompare(kdesc, kval, &entry->klen);
         }
     }
-    
+
     // 2) 같은 key를 가진 index entry가 없다면 kval 이하의 key 값을 갖는 index entry 중
     // 가장 큰 key 값을 가진 index entry와 FALSE를 반환
-    *idx = hi;
+    *idx = mid;
     return FALSE;
 } /* edubtm_BinarySearchInternal() */
 
@@ -172,17 +180,25 @@ Boolean edubtm_BinarySearchLeaf(
     lo = 0, hi = lpage->hdr.nSlots - 1;
     while(lo <= hi) {
         mid = (lo + hi) >> 1;
-        entry = lpage->data + lpage->slot[-mid];
+        entry = &(lpage->data[lpage->slot[-mid]]);
         
         // key 값을 비교
         cmp = edubtm_KeyCompare(kdesc, kval, &entry->klen);
 
         if (cmp == LESS) hi = mid - 1;
         else if (cmp == GREAT) lo = mid + 1;
-        else if (cmp == EQUAL) {
-            // 1) 만약 같은 key 값을 가진 index entry가 있다면 slot 번호와 TRUE를 반환
-            *idx = mid;
-            return TRUE;
+        else if (cmp == EQUAL) break;
+    }
+
+    if (cmp == EQUAL) {
+        *idx = mid;
+        return TRUE;
+    }
+    else {
+        while(cmp != GREAT && mid >= 0) {
+            mid--;
+            entry = &(lpage->data[lpage->slot[-mid]]);
+            cmp = edubtm_KeyCompare(kdesc, kval, &entry->klen);
         }
     }
     

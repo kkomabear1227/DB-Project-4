@@ -225,8 +225,8 @@ Four edubtm_FetchNext(
     cmp = edubtm_KeyCompare(kdesc, &next->key, kval);
 	if (compOp == SM_LE && (cmp != LESS && cmp != EQUAL)) next->flag = CURSOR_EOS;
     else if (compOp == SM_LT && cmp != LESS) next->flag = CURSOR_EOS;
-    else if (compOp == SM_GE && (cmp != GREATER && cmp != EQUAL)) next->flag = CURSOR_EOS;
-    else if (compOp == SM_GT && (cmp != GREATER)) next->flag = CURSOR_EOS;
+    else if (compOp == SM_GE && (cmp != GREAT && cmp != EQUAL)) next->flag = CURSOR_EOS;
+    else if (compOp == SM_GT && (cmp != GREAT)) next->flag = CURSOR_EOS;
             
     // 4. 마무리
     BfM_FreeTrain(&overflow, PAGE_BUF);
