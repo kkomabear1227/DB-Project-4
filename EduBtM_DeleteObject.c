@@ -105,9 +105,18 @@ Four EduBtM_DeleteObject(
 
 
 	/* Delete following 3 lines before implement this function */
-	printf("and delete operation has not been implemented yet.\n");
-	return(eNOTSUPPORTED_EDUBTM);
+	//printf("and delete operation has not been implemented yet.\n");
+	//return(eNOTSUPPORTED_EDUBTM);
 
+    // B+ tree index에서 object를 삭제한다.
+    // 1) edubtm_Delete()를 호출해 <object key, object ID>를 B+ tree index에서 제거한다.
+    edubtm_Delete(catObjForFile, root, kdesc, kval, oid, &lf, &lh, &item, dlPool, dlHead);
+    // 2) underflow가 발생한 경우, btm_root_delete()를 호출해 해결한다.
+    if (lf) btm_root_delete(&pFid, root, dlPool, dlHead);
+    // 3) root page에서 split이 발생한 경우, edubtm_root_insert()를 호출해 처리한다. 
+    else if (lh) edubtm_root_insert(catObjForFile, root, &item);
+
+    BfM_SetDirty(root, PAGE_BUF);
     
     return(eNOERROR);
     

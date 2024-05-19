@@ -124,14 +124,54 @@ Four edubtm_Delete(
         if(kdesc->kpart[i].type!=SM_INT && kdesc->kpart[i].type!=SM_VARSTRING)
             ERR(eNOTSUPPORTED_EDUBTM);
     }
-
         
     *h = *f = FALSE;
     
     
     /* Delete following 2 lines before implement this function */
-    printf("and delete operation has not been implemented yet.\n");
+    //printf("and delete operation has not been implemented yet.\n");
+    
+    // 파라미터로 주어진 page를 root로 하는 B+ tree index에서 <object key, object ID>를 삭제함
+    // 0) B+ tree를 얻어옴
+    BfM_GetTrain(catObjForFile, &catPage, PAGE_BUF);
+    GET_PTR_TO_CATENTRY_FOR_BTREE(catObjForFile, catPage, catEntry);
+    MAKE_PAGEID(pFid, catEntry->fid.volNo, catEntry->firstPage);
+    BfM_GetTrain(root, &rpage, PAGE_BUF);
 
+    // Case 1. root page가 internal page
+    if (rpage->any.hdr.type & INTERNAL) {
+        // 1) 삭제할 pair가 저장된 leaf page를 찾기 위해 탐색을 진행
+        edubtm_BinarySearchInternal(&rpage->bi, kdesc, kval, &idx);
+        if (idx < 0) MAKE_PAGEID(child, root->volNo, rpage->bi.hdr.p0);
+        else {
+            iEntry = &rpage->bi.data[rpage->bi.slot[-idx]];
+            MAKE_PAGEID(child, root->volNo, iEntry->spid);
+        }
+
+        // 2) B+ subtree에서 <object key, object ID>를 삭제하기 위해 재귀적으로 edubtm_Delete()를 호출
+        edubtm_Delete(catObjForFile, &child, kdesc, kval, oid, &lf, &lh, &litem, dlPool, dlHead);
+
+        // 3) underflow가 발생한 경우 btm_Unserflow()로 처리함.
+        if (lf) {
+            btm_Underflow(&pFid, rpage, &child, idx, f, &lh, &litem, dlPool, dlHead);
+            BfM_SetDirty(root, PAGE_BUF);
+            // a) underfloow가 발생한 자식 page의 부모 page에서 overflow가 발생한 경우,
+            // edubtm_InsertInternal()을 호출한다.
+            if (lh) {
+                memcpy(&tKey, &litem.klen, sizeof(KeyValue));
+                edubtm_BinarySearchInternal(rpage, kdesc, &tKey, &idx);
+                edubtm_InsertInternal(catObjForFile, rpage, &litem, idx, h, item);
+            }
+        }
+    }
+    // Case 2. root page가 leaf page
+    else if (rpage->any.hdr.type & LEAF) {
+        // edubfm_DeleteLeaf()를 호출해 <object key, object ID>를 삭제함
+        edubtm_DeleteLeaf(&pFid, root, rpage, kdesc, kval, oid, f, h, item, dlPool, dlHead);
+    }
+
+    BfM_FreeTrain(catObjForFile, PAGE_BUF);
+    BfM_FreeTrain(root, PAGE_BUF);
 
     return(eNOERROR);
     
