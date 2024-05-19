@@ -675,7 +675,7 @@ void execute(
 			oid.slotNo = *numObjects;
 			oid.unique = (*numObjects)++;
 			/* The successful default solution code is called if "Edu" is omitted from the function name in the following line */
-			e = BtM_InsertObject(catalogEntry, rootPid, kdesc, &kval, &oid, NULL, NULL);
+			e = EduBtM_InsertObject(catalogEntry, rootPid, kdesc, &kval, &oid, NULL, NULL);
 			if (e == eDUPLICATEDKEY_BTM) {
 				fprintfWrapper(logFp, "There is the same key in the B+ tree index.\nEduBtM allows only unique keys\n");
 				if(testType == COVERAGE) {
@@ -781,7 +781,7 @@ void execute(
 			makeKeyValue(keyType, endIntKey, endStringKey, &stopKval);
 			
 			/* The successful default solution code is called if "Edu" is omitted from the function name in the following line */	
-			e = BtM_Fetch(rootPid, kdesc, &startKval, *startCompOp, &stopKval, *endCompOp, &cursor);
+			e = EduBtM_Fetch(rootPid, kdesc, &startKval, *startCompOp, &stopKval, *endCompOp, &cursor);
 			if (testType == COVERAGE) {
 				sort(keyType);
 				hashResult = fetch(keyType, *startCompOp, *endCompOp, *startIntKey, startStringKey, *endIntKey, endStringKey);

@@ -119,7 +119,7 @@ Four edubtm_root_insert(
 
     // 4. 마무리
     BfM_SetDirty(&newPid, PAGE_BUF);
-    BfM_SetDirty(&root, PAGE_BUF);
+    BfM_SetDirty(root, PAGE_BUF);
     BfM_SetDirty(&nextPid, PAGE_BUF);
 
     BfM_FreeTrain(&newPid, PAGE_BUF);

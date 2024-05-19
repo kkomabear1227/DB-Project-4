@@ -99,6 +99,7 @@ Four edubtm_SplitInternal(
     // 1) 새로운 page를 할당 받고, internal page로 초기화한다.
     btm_AllocPage(catObjForFile, &fpage->hdr.pid, &newPid);
     edubtm_InitInternal(&newPid, FALSE, FALSE);
+    BfM_GetNewTrain(&newPid, &npage, PAGE_BUF);
     // 2) 기존 index entry와 삽입할 index entry를 key 순으로 정렬한 뒤, 두 페이지에 나누어 저장한다.
     // a) 먼저, overflow가 발생한 page (fpage)에 index entry를 50% 정도 채운다.
     sum = 0;
@@ -264,6 +265,7 @@ Four edubtm_SplitLeaf(
     // 1) 새로운 page를 할당 받고, internal page로 초기화한다.
     btm_AllocPage(catObjForFile, &fpage->hdr.pid, &newPid);
     edubtm_InitLeaf(&newPid, FALSE, FALSE);
+    BfM_GetNewTrain(&newPid, &npage, PAGE_BUF);
     // 2) 기존 index entry들과 삽입할 index entry를 key 순으로 정렬한 뒤, 나누어 저장한다.
     // a) 먼저, overflow가 발생한 page (fpage)에 index entry를 50% 정도 채운다.
     sum = 0;

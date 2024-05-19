@@ -249,9 +249,9 @@ Four edubtm_InsertLeaf(
     memcpy(leaf.kval, kval->val, leaf.klen);
 
     // Case 1. Page에 free space가 있다면
-    if (BI_FREE(page) >= entryLen + sizeof(Two)) {
+    if (BL_FREE(page) >= entryLen + sizeof(Two)) {
         // a) 필요시 page를 compaction함
-        if (BI_CFREE(page) < entryLen + sizeof(Two)) edubtm_CompactLeafPage(page, NIL);
+        if (BL_CFREE(page) < entryLen + sizeof(Two)) edubtm_CompactLeafPage(page, NIL);
         // b) binary search로 찾은 위치에 index entry를 삽입함
         // b-1) 결정된 slotNo를 사용하기 위해 slot array를 재배열
         for (i = page->hdr.nSlots - 1; i >= 1 + idx; i--)
