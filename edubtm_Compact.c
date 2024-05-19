@@ -163,20 +163,22 @@ void edubtm_CompactLeafPage(
         for (i = 0; i < apage->hdr.nSlots; i++) {
             if (i != slotNo) {
                 entry = apage->data + apage->slot[-i];
-                len = OBJECTID_SIZE + 2 * sizeof(Two) + ALIGNED_LENGTH(entry->klen);
+                //len = OBJECTID_SIZE + 2 * sizeof(Two) + ALIGNED_LENGTH(entry->klen);
+                // overflow?
                 
-                memcpy(tpage.data + apageDataOffset, entry, len);
+                memcpy(tpage.data + apageDataOffset, entry, OBJECTID_SIZE + 2 * sizeof(Two) + ALIGNED_LENGTH(entry->klen));
                 apage->slot[-i] = apageDataOffset;
-                apageDataOffset += len;
+                apageDataOffset += OBJECTID_SIZE + 2 * sizeof(Two) + ALIGNED_LENGTH(entry->klen);
             }
         }
         // slotNo에 대응되는 index entry는 마지막 index entry로 저장한다.
         entry = apage->data + apage->slot[-slotNo];
-        len = OBJECTID_SIZE + 2 * sizeof(Two) + ALIGNED_LENGTH(entry->klen);
+        //len = OBJECTID_SIZE + 2 * sizeof(Two) + ALIGNED_LENGTH(entry->klen);
+        // overflow?
                 
-        memcpy(tpage.data + apageDataOffset, entry, len);
+        memcpy(tpage.data + apageDataOffset, entry, OBJECTID_SIZE + 2 * sizeof(Two) + ALIGNED_LENGTH(entry->klen));
         apage->slot[-slotNo] = apageDataOffset;
-        apageDataOffset += len;
+        apageDataOffset += OBJECTID_SIZE + 2 * sizeof(Two) + ALIGNED_LENGTH(entry->klen);
 
         memcpy(apage->data, tpage.data, apageDataOffset);
     }
@@ -186,11 +188,12 @@ void edubtm_CompactLeafPage(
         for (i = 0; i < apage->hdr.nSlots; i++) {
             if (i != slotNo) {
                 entry = apage->data + apage->slot[-i];
-                len = sizeof(ShortPageID) + sizeof(Two) + ALIGNED_LENGTH(entry->klen);
-                
-                memcpy(tpage.data + apageDataOffset, entry, len);
+                //len = OBJECTID_SIZE + 2 * sizeof(Two) + ALIGNED_LENGTH(entry->klen);
+                // overflow?
+
+                memcpy(tpage.data + apageDataOffset, entry, OBJECTID_SIZE + 2 * sizeof(Two) + ALIGNED_LENGTH(entry->klen));
                 apage->slot[-i] = apageDataOffset;
-                apageDataOffset += len;
+                apageDataOffset += OBJECTID_SIZE + 2 * sizeof(Two) + ALIGNED_LENGTH(entry->klen);
             }
         }
         memcpy(apage->data, tpage.data, apageDataOffset);
