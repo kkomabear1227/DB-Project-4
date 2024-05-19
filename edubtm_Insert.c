@@ -136,14 +136,21 @@ Four edubtm_Insert(
         iEntryOffset = apage->bi.slot[-idx];
         iEntry = (btm_InternalEntry*) &apage->bi.data[iEntryOffset];
 
-        if (idx >= 0) MAKE_PAGEID(newPid, root->volNo, iEntry->spid);
-        else MAKE_PAGEID(newPid, root->volNo, apage->bi.hdr.p0);
+        if (idx < 0) MAKE_PAGEID(newPid, root->volNo, apage->bi.hdr.p0);
+        else MAKE_PAGEID(newPid, root->volNo, iEntry->spid);
 
         lh = FALSE;
         lf = FALSE;
 
         edubtm_Insert(catObjForFile, &newPid, kdesc, kval, oid, &lf, &lh, &litem, dlPool, dlHead);
-        
+        // 3) 자식 page에서 split이 발생한 경우, split으로 생성된 . 새 page를 가리키는 index entry를 반환
+        // 4) 파라미터로 주어진 root page에서 split이 발새앟면, split으로 생긴 새 page를 가리키는 index entry를 반환
+        if (lh) {
+            tKey.len = litem.klen;
+            memcpy(tKey.val, litem.kval, tKey.len);
+            edubtm_BinarySearchInternal(&(apage->bi), kdesc, &tKey, &idx);
+            edubtm_InsertInternal(catObjForFile, &(apage->bi), &litem, idx, h, item);
+        }
     }
     // Case 2. Root page가 LEAF page이다.
     else if (apage->any.hdr.type & LEAF) {
@@ -273,7 +280,37 @@ Four edubtm_InsertInternal(
     /*@ Initially the flag are FALSE */
     *h = FALSE;
     
-    
+    // Internal page에 새 index entry를 삽입한다.
+    // split이 발생하면, split으로 생긴 . 새internal page를 가리키는 index entry를 반환한다.
+
+    // 1) 새 index entry를 삽입하기 위해 필요한 free space를 계산한다.
+    entryLen = sizeof(ShortPageID) + sizeof(Two)+ ALIGNED_LENGTH(item->klen);
+
+    // Case 1. Page에 free space가 있다면
+    if (BI_FREE(page) >= entryLen + sizeof(Two)) {
+        // a) 필요시 page를 compaction함
+        if (BI_CFREE(page) < entryLen + sizeof(Two)) edubtm_CompactInternalPage(page, NIL);
+        // b) 파라미터로 주어진 slotNo 다음에 index entry를 삽입
+        for (i = page->hdr.nSlots - 1; i >= 1 + high; i--)
+            page->slot[-(i+1)] = page->slot[-i];
+
+        page->slot[-(high + 1)] = page->hdr.free;
+
+        entry = page->data + page->hdr.free;
+        entry->spid = item->spid;
+        entry->klen = item->klen;
+        memcpy(&entry->kval, item->kval, item->klen);
+
+        page->hdr.free += entryLen;
+        page->hdr.nSlots++;
+    }
+    // Case 2. Page에 free space가 없다면
+    else {
+        // a) edubtm_SplitInternal()을 호출해 page를 나눈다.
+        // 새롭게 생긴 internal page를 가리키는 index entry를 반환한다.
+        edubtm_SplitInternal(catObjForFile, page, high, item, ritem);
+        *h = TRUE;
+    }
 
     return(eNOERROR);
     

@@ -72,7 +72,51 @@ void edubtm_CompactInternalPage(
     Two                 i;                      /* index variable */
     btm_InternalEntry   *entry;                 /* an entry in leaf page */
 
-    
+    // 1) Internal page의 모든 free space가 하나의 연속된 공간을 만들도록 offset을 재조정
+    apageDataOffset = 0;
+
+    // Case 1. 만약 slotNo가 NIL이 아니라면
+    if (slotNo != NIL) {
+        // slotNo에 대응하는 index entry를 제외한 모든 index entry를 앞에서부터 저장한다.
+        for (i = 0; i < apage->hdr.nSlots; i++) {
+            if (i != slotNo) {
+                entry = apage->data + apage->slot[-i];
+                len = sizeof(ShortPageID) + sizeof(Two) + ALIGNED_LENGTH(entry->klen);
+                
+                memcpy(tpage.data + apageDataOffset, entry, len);
+                apage->slot[-i] = apageDataOffset;
+                apageDataOffset += len;
+            }
+        }
+        // slotNo에 대응되는 index entry는 마지막 index entry로 저장한다.
+        entry = apage->data + apage->slot[-slotNo];
+        len = sizeof(ShortPageID) + sizeof(Two) + ALIGNED_LENGTH(entry->klen);
+                
+        memcpy(tpage.data + apageDataOffset, entry, len);
+        apage->slot[-slotNo] = apageDataOffset;
+        apageDataOffset += len;
+
+        memcpy(apage->data, tpage.data, apageDataOffset);
+    }
+    // Case 2. 만약 slotNo가 NIL이라면
+    else {
+        // page의 모든 index entry를 앞에서부터 저장한다.
+        for (i = 0; i < apage->hdr.nSlots; i++) {
+            if (i != slotNo) {
+                entry = apage->data + apage->slot[-i];
+                len = sizeof(ShortPageID) + sizeof(Two) + ALIGNED_LENGTH(entry->klen);
+                
+                memcpy(tpage.data + apageDataOffset, entry, len);
+                apage->slot[-i] = apageDataOffset;
+                apageDataOffset += len;
+            }
+        }
+        memcpy(apage->data, tpage.data, apageDataOffset);
+    }
+
+    // 2) Page header 갱신
+    apage->hdr.free = apageDataOffset;
+    apage->hdr.unused = 0;
 
 } /* edubtm_CompactInternalPage() */
 
