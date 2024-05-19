@@ -90,7 +90,7 @@ Boolean edubtm_BinarySearchInternal(
 
     // Internal page들 중에서 파라미터로 주어진 kval 이하의 key 값을 갖는 index entry를 검색해 slot 번호를 반환한다.
     // 3) kval이 주어진 page의 index entry 모두보다 작다면..
-    if (ipage->hdr.nSlots < 0) {
+    if (ipage->hdr.nSlots == 0) {
         *idx = -1;
         return FALSE;
     }
@@ -172,7 +172,7 @@ Boolean edubtm_BinarySearchLeaf(
 
     // Leaf page 중 파라미터로 주어진 kval 이하의 key값을 갖는 index entry의 slot 번호를 반환
     // 3) kval이 주어진 page의 index entry 모두보다 작다면..
-    if (lpage->hdr.nSlots < 0) {
+    if (lpage->hdr.nSlots == 0) {
         *idx = -1;
         return FALSE;
     }
