@@ -134,14 +134,14 @@ Four edubtm_SplitInternal(
 
             if (!flag && i == high + 1) {
                 entryLen = sizeof(ShortPageID) + sizeof(Two) + ALIGNED_LENGTH(item->klen);
-                memcpy(ritem, item, entryLen);
+                memcpy(ritem, item, sizeof(ShortPageID) + sizeof(Two) + ALIGNED_LENGTH(item->klen));
             }
             else {
                 fEntryOffset = fpage->slot[-j];
                 fEntry = &fpage->data[fEntryOffset];
 
                 entryLen = sizeof(ShortPageID) + sizeof(Two) + ALIGNED_LENGTH(fEntry->klen);
-                memcpy(ritem, fEntry, entryLen);
+                memcpy(ritem, fEntry, sizeof(ShortPageID) + sizeof(Two) + ALIGNED_LENGTH(fEntry->klen));
 
                 if (fEntryOffset + entryLen == fpage->hdr.free) fpage->hdr.free -= entryLen;
                 else fpage->hdr.unused += entryLen;
@@ -157,14 +157,14 @@ Four edubtm_SplitInternal(
 
             if (!flag && i == high + 1) {
                 entryLen = sizeof(ShortPageID) + sizeof(Two) + ALIGNED_LENGTH(item->klen);
-                memcpy(nEntry, item, entryLen);
+                memcpy(nEntry, item, sizeof(ShortPageID) + sizeof(Two) + ALIGNED_LENGTH(item->klen));
             }
             else {
                 fEntryOffset = fpage->slot[-j];
                 fEntry = &fpage->data[fEntryOffset];
 
                 entryLen = sizeof(ShortPageID) + sizeof(Two) + ALIGNED_LENGTH(fEntry->klen);
-                memcpy(nEntry, fEntry, entryLen);
+                memcpy(nEntry, fEntry, sizeof(ShortPageID) + sizeof(Two) + ALIGNED_LENGTH(fEntry->klen));
 
                 if (fEntryOffset + entryLen == fpage->hdr.free) fpage->hdr.free -= entryLen;
                 else fpage->hdr.unused += entryLen;
@@ -256,7 +256,7 @@ Four edubtm_SplitLeaf(
     Two                         alignedKlen;    /* aligned length of the key length */
     Two                         itemEntryLen;   /* length of entry for item */
     Two                         entryLen;       /* entry length */
-    Boolean                     flag;
+    Boolean                     flag = FALSE;
     Boolean                     isTmp;
  
     // Overflow가 발생한 leaf page를 split하여 index entry를 삽입 후
@@ -272,18 +272,18 @@ Four edubtm_SplitLeaf(
     maxLoop = fpage->hdr.nSlots + 1;   
     j = 0;
 
-    for (i = 0; i < maxLoop && sum < BI_HALF; i++) {
+    for (i = 0; i < maxLoop && sum < BL_HALF; i++) {
         // 삽입을 진행해야할 object가 fpage에 섞여들어가게 될 경우
         // item이 fpage의 멤버가 되었으므로 flag를 켜주어야한다. 
         if (i == high + 1) {
-            entryLen = sizeof(ShortPageID) + 2 * sizeof(Two) + ALIGNED_LENGTH(item->klen);
+            entryLen = OBJECTID_SIZE + 2 * sizeof(Two) + ALIGNED_LENGTH(item->klen);
             flag = TRUE;
         }
         else {
             fEntryOffset = fpage->slot[-j];
             fEntry = &fpage->data[fEntryOffset];
             
-            entryLen = sizeof(ShortPageID) + 2 * sizeof(Two) + ALIGNED_LENGTH(item->klen);
+            entryLen = OBJECTID_SIZE + 2 * sizeof(Two) + ALIGNED_LENGTH(fEntry->klen);
             j++;
         }
         sum += entryLen + sizeof(Two);
@@ -297,7 +297,7 @@ Four edubtm_SplitLeaf(
         nEntry = &npage->data[nEntryOffset];
 
         if (!flag && i == high + 1) {
-            entryLen = sizeof(ShortPageID) + 2 * sizeof(Two) + ALIGNED_LENGTH(item->klen);
+            entryLen = OBJECTID_SIZE + 2 * sizeof(Two) + ALIGNED_LENGTH(item->klen);
 
             nEntry->nObjects = item->nObjects;
             nEntry->klen = item->klen;
@@ -309,7 +309,7 @@ Four edubtm_SplitLeaf(
             fEntryOffset = fpage->slot[-j];
             fEntry = &fpage->data[fEntryOffset];
 
-            entryLen = sizeof(ShortPageID) + 2 * sizeof(Two) + ALIGNED_LENGTH(fEntry->klen);
+            entryLen = OBJECTID_SIZE + 2 * sizeof(Two) + ALIGNED_LENGTH(fEntry->klen);
             memcpy(nEntry, fEntry, entryLen);
 
             if (fEntryOffset + entryLen == fpage->hdr.free) fpage->hdr.free -= entryLen;
@@ -334,9 +334,9 @@ Four edubtm_SplitLeaf(
         memcpy(fEntry->kval, item->kval, item->klen);
         memcpy(&fEntry->kval[ALIGNED_LENGTH(item->klen)], &item->oid, OBJECTID_SIZE);
 
-        entryLen = sizeof(ShortPageID) + 2 * sizeof(Two) + ALIGNED_LENGTH(item->klen);
+        entryLen = OBJECTID_SIZE + 2 * sizeof(Two) + ALIGNED_LENGTH(item->klen);
 
-        fpage->hdr.free += entryLen;
+        fpage->hdr.free += OBJECTID_SIZE + 2 * sizeof(Two) + ALIGNED_LENGTH(item->klen);
         fpage->hdr.nSlots++;
     }
 
