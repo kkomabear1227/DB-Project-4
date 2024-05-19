@@ -230,7 +230,50 @@ Four edubtm_InsertLeaf(
     /*@ Initially the flags are FALSE */
     *h = *f = FALSE;
     
+    // Leaf page에 새 index entry를 삽입한다.
+    // split이 발생하면, split으로 생긴 새 leaf page를 가리키는 index entry를 반환한다.
 
+    // 1) 새 index entry를 삽입하기 위한 위치를 결정한다.
+    found = edubtm_BinarySearchLeaf(page, kdesc, kval, &idx);
+
+    // 2) 새 index entry를 삽입하기 위해 필요한 free space를 계산
+    if (kdesc->kpart[0].type == SM_INT) alignedKlen = ALIGNED_LENGTH(kdesc->kpart[0].length);
+    else alignedKlen = ALIGNED_LENGTH(kval->len);
+
+    entryLen = 2 * sizeof(Two) + alignedKlen + OBJECTID_SIZE;
+
+    // index entry 설정
+    leaf.oid = *oid;
+    leaf.nObjects = 1;
+    leaf.klen = kval->len;
+    memcpy(leaf.kval, kval->val, leaf.klen);
+
+    // Case 1. Page에 free space가 있다면
+    if (BI_FREE(page) >= entryLen + sizeof(Two)) {
+        // a) 필요시 page를 compaction함
+        if (BI_CFREE(page) < entryLen + sizeof(Two)) edubtm_CompactLeafPage(page, NIL);
+        // b) binary search로 찾은 위치에 index entry를 삽입함
+        // b-1) 결정된 slotNo를 사용하기 위해 slot array를 재배열
+        for (i = page->hdr.nSlots - 1; i >= 1 + idx; i--)
+            page->slot[-(i+1)] = page->slot[-i];
+        // 결정된 slotNo를 갖는 slot에 새 index entry의 offset을 저장
+        entryOffset = page->slot[-(1 + idx)] = page->hdr.free;
+        entry = (btm_LeafEntry*)&(page->data[entryOffset]);
+
+        memcpy(entry, &leaf.nObjects, entryLen - OBJECTID_SIZE);
+        memcpy(&entry->kval[alignedKlen], &leaf.oid, OBJECTID_SIZE);
+
+        page->hdr.free += entryLen;
+        page->hdr.nSlots++;
+    }
+    // Case 2. Page에 free space가 없다면
+    else {
+        // a) edubtm_SplitLeaf()을 호출해 page를 나눈다.
+        // 새롭게 생긴 internal page를 가리키는 index entry를 반환한다.
+        // index entry 설정
+        edubtm_SplitLeaf(catObjForFile, pid, page, idx, &leaf, item);
+        *h = TRUE;
+    }
 
     return(eNOERROR);
     
@@ -315,4 +358,3 @@ Four edubtm_InsertInternal(
     return(eNOERROR);
     
 } /* edubtm_InsertInternal() */
-
