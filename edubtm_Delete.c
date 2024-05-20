@@ -242,8 +242,38 @@ Four edubtm_DeleteLeaf(
 
 
     /* Delete following 2 lines before implement this function */
-    printf("and delete operation has not been implemented yet.\n");
+    //printf("and delete operation has not been implemented yet.\n");
 
+    // Leaf page에서 <object key, object ID> pair를 삭제한다.
+
+    // 1) 삭제할 <object key, object ID> pair가 저장된 index entry의 slot을 삭제한다.
+    // slot array는 compaction을 시킨다.
+    found = edubtm_BinarySearchLeaf(apage, kdesc, kval, &idx);
+    if (found) {
+        lEntry = &apage->data[apage->slot[-idx]];
+        lEntryOffset = apage->slot[-idx];
+        
+        entryLen = OBJECTID_SIZE + 2 * sizeof(Two) + ALIGNED_LENGTH(lEntry->klen);
+
+        memcpy(&tOid, &lEntry->kval[ALIGNED_LENGTH(lEntry->klen)], OBJECTID_SIZE);
+
+        // Compaction
+        if (btm_ObjectIdComp(oid, &tOid) == EQUAL) {
+            for (i = idx; i < apage->hdr.nSlots - 1; i++) {
+                apage->slot[-i] = apage->slot[-(i+1)];
+            }
+
+            if (lEntryOffset + entryLen == apage->hdr.free) apage->hdr.free -= entryLen;
+            else apage->hdr.unused += entryLen;
+
+            apage->hdr.nSlots--;
+        }
+    }
+
+    // 3) 만약 leaf page에서 underflow가 발생하면, f를 TRUE로 설정한다.
+    if (BL_FREE(apage) > BL_HALF) *f = TRUE;
+
+    BfM_SetDirty(pid, PAGE_BUF);
 	      
     return(eNOERROR);
     

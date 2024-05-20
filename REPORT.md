@@ -1,8 +1,8 @@
 # EduBtM Report
 
-Name:
+Name: 오형민
 
-Student id:
+Student id: 20242502
 
 # Problem Analysis
 
